@@ -1,0 +1,18 @@
+logger:
+  level: info
+
+grpc_server:
+  port: 8081
+
+sql_storage:
+  dsn: postgres://root:123@db:5432/rate-limiter?sslmode=disable
+  migrations_dir: migrations
+
+redis:
+  addr: redis:6379
+
+leaky_bucket:
+  leak_rate: 60
+  login_capacity: 10
+  password_capacity: 100
+  ip_capacity: 1000

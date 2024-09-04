@@ -1,0 +1,48 @@
+services:
+  redis:
+    container_name: redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s         # Check every [x] seconds
+      timeout: 5s           # Timeout after [x] seconds
+      retries: 5            # Retry [x] times before marking as unhealthy
+      start_period: 30s     # Wait [x] seconds before starting health checks
+
+  db:
+    container_name: db
+    image: postgres:16
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: rate-limiter
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d rate-limiter"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  rate-limiter:
+    container_name: rate-limiter
+    image: thejubadze/rate-limiter
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    command: >
+      /bin/sh -c "until pg_isready -h db -p 5432; do echo waiting for db; sleep 2; done;
+      goose -dir /migrations postgres postgres://root:123@db:5432/rate-limiter?sslmode=disable up;
+      ./rate-limiter"

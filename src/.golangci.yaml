@@ -1,0 +1,78 @@
+run:
+  tests: true
+
+linters-settings:
+  depguard:
+    rules:
+      prevent_unmaintained_packages:
+        list-mode: strict
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+          - github.com/TheJubadze/RateLimiter
+          - github.com/spf13
+          - github.com/go-redis
+          - github.com/sirupsen/logrus
+          - github.com/lib/pq
+          - github.com/stretchr/testify
+        deny:
+          - pkg: io/ioutil
+            desc: "replaced by io and os packages since Go 1.16: https://tip.golang.org/doc/go1.16#ioutil"
+  funlen:
+    lines: 150
+    statements: 80
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    - copyloopvar
+    - depguard
+    - dogsled
+    - dupl
+    - durationcheck
+    - errorlint
+    - exhaustive
+    - funlen
+    - gci
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - gofmt
+    - gofumpt
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - importas
+    - ineffassign
+    - makezero
+    - misspell
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - stylecheck
+    - tagliatelle
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - wastedassign
+    - whitespace

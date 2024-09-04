@@ -1,0 +1,73 @@
+syntax = "proto3";
+
+package api;
+
+option go_package = "./pb";
+
+// The AuthService defines the available methods.
+service RateLimiter {
+  rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
+  rpc ResetBucket(ResetBucketRequest) returns (ResetBucketResponse);
+  rpc AddToWhitelist(AddToWhitelistRequest) returns (AddToWhitelistResponse);
+  rpc RemoveFromWhitelist(RemoveFromWhitelistRequest) returns (RemoveFromWhitelistResponse);
+  rpc AddToBlacklist(AddToBlacklistRequest) returns (AddToBlacklistResponse);
+  rpc RemoveFromBlacklist(RemoveFromBlacklistRequest) returns (RemoveFromBlacklistResponse);
+}
+
+// Request and Response for the Authorize method
+message AuthorizeRequest {
+  string login = 1;
+  string password = 2;
+  string ip = 3;
+}
+
+message AuthorizeResponse {
+  bool authorized = 1;
+  string message = 2;
+}
+
+// Request and Response for ResetBucket method
+message ResetBucketRequest {
+  string login = 1;
+  string ip = 2;
+}
+
+message ResetBucketResponse {
+  string message = 1;
+}
+
+// Request and Response for AddToWhitelist method
+message AddToWhitelistRequest {
+  string ip = 1;
+}
+
+message AddToWhitelistResponse {
+  string message = 1;
+}
+
+// Request and Response for RemoveFromWhitelist method
+message RemoveFromWhitelistRequest {
+  string ip = 1;
+}
+
+message RemoveFromWhitelistResponse {
+  string message = 1;
+}
+
+// Request and Response for AddToBlacklist method
+message AddToBlacklistRequest {
+  string ip = 1;
+}
+
+message AddToBlacklistResponse {
+  string message = 1;
+}
+
+// Request and Response for RemoveFromBlacklist method
+message RemoveFromBlacklistRequest {
+  string ip = 1;
+}
+
+message RemoveFromBlacklistResponse {
+  string message = 1;
+}
