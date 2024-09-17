@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type BucketStorage interface {
+type Storage interface {
 	CheckRateLimit(ctx context.Context, key string, limit int, leakRate time.Duration) (bool, error)
 	ResetBucket(ctx context.Context, key string) error
 }

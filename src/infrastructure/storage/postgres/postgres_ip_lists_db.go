@@ -2,8 +2,11 @@ package postgresdb
 
 import (
 	"database/sql"
+	"fmt"
 	"net"
+	"regexp"
 
+	// postgres driver.
 	_ "github.com/lib/pq"
 )
 
@@ -28,7 +31,16 @@ func (p *PostgresDB) InsertNetwork(table, subnet string) error {
 	if err != nil {
 		return err
 	}
-	_, err = p.db.Exec("INSERT INTO "+table+" (network) VALUES ($1)", ipNet.String())
+
+	sanitizedTable, err := sanitizeTableName(table)
+	if err != nil {
+		return err
+	}
+
+	// #nosec G201 - sanitized table name is safe
+	query := fmt.Sprintf("INSERT INTO %s (network) VALUES ($1)", sanitizedTable)
+	_, err = p.db.Exec(query, ipNet.String())
+
 	return err
 }
 
@@ -38,7 +50,14 @@ func (p *PostgresDB) DeleteNetwork(table, subnet string) (bool, error) {
 		return false, err
 	}
 
-	result, err := p.db.Exec("DELETE FROM "+table+" WHERE network = $1", ipNet.String())
+	sanitizedTable, err := sanitizeTableName(table)
+	if err != nil {
+		return false, err
+	}
+
+	// #nosec G201 - sanitized table name is safe
+	query := fmt.Sprintf("DELETE FROM %s WHERE network = $1", sanitizedTable)
+	result, err := p.db.Exec(query, ipNet.String())
 	if err != nil {
 		return false, err
 	}
@@ -61,17 +80,32 @@ func (p *PostgresDB) IsNetworkExists(table, subnet string) (bool, error) {
 		return false, err
 	}
 
-	rows, err := p.db.Query("SELECT network FROM "+table+" WHERE network = $1", ipNet.String())
+	sanitizedTable, err := sanitizeTableName(table)
 	if err != nil {
 		return false, err
 	}
-	defer func(rows *sql.Rows) {
-		_ = rows.Close()
-	}(rows)
+
+	// #nosec G201 - sanitized table name is safe
+	query := fmt.Sprintf("SELECT network FROM %s WHERE network = $1", sanitizedTable)
+	rows, err := p.db.Query(query, ipNet.String())
+	if err != nil {
+		return false, err
+	}
+	defer rows.Close()
+	if err := rows.Err(); err != nil {
+		return false, err
+	}
 
 	if rows.Next() {
 		return true, nil
 	}
 
 	return false, nil
+}
+
+func sanitizeTableName(table string) (string, error) {
+	if matched, _ := regexp.MatchString("^[a-zA-Z0-9_]+$", table); !matched {
+		return "", fmt.Errorf("invalid table name: %s", table)
+	}
+	return table, nil
 }

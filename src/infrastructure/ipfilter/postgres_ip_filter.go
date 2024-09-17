@@ -12,7 +12,7 @@ type PostgresqlService struct {
 	db iplists.DB
 }
 
-// NewPostgresqlService initializes a new PostgresqlService
+// NewPostgresqlService initializes a new PostgresqlService.
 func NewPostgresqlService(connString string) (*PostgresqlService, error) {
 	db, err := postgresdb.NewPostgresDB(connString)
 	if err != nil {
@@ -21,7 +21,7 @@ func NewPostgresqlService(connString string) (*PostgresqlService, error) {
 	return &PostgresqlService{db: db}, nil
 }
 
-// Close closes the service connection
+// Close closes the service connection.
 func (s *PostgresqlService) Close() error {
 	return s.db.Close()
 }

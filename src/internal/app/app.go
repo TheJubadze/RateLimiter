@@ -9,7 +9,6 @@ import (
 	"github.com/TheJubadze/RateLimiter/infrastructure/storage/redis"
 	"github.com/TheJubadze/RateLimiter/internal/api"
 	"github.com/TheJubadze/RateLimiter/internal/config"
-
 	"github.com/spf13/viper"
 )
 
