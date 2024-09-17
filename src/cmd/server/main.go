@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"github.com/TheJubadze/RateLimiter/pkg/app"
+	"github.com/TheJubadze/RateLimiter/internal/app"
 )
 
 var configFile = flag.String("config", "/etc/rate-limiter/config.yaml", "Path to configuration file")

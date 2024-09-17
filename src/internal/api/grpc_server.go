@@ -6,11 +6,12 @@ import (
 	"net"
 	"time"
 
+	"github.com/TheJubadze/RateLimiter/interfaces/ipfilter"
+	"github.com/TheJubadze/RateLimiter/interfaces/logger"
+	"github.com/TheJubadze/RateLimiter/interfaces/storage/bucket"
 	"github.com/TheJubadze/RateLimiter/internal/config"
-	"github.com/TheJubadze/RateLimiter/pkg/ipfilter"
-	"github.com/TheJubadze/RateLimiter/pkg/logger"
-	"github.com/TheJubadze/RateLimiter/pkg/storage"
 	"github.com/TheJubadze/RateLimiter/proto/pb"
+
 	"google.golang.org/grpc"
 )
 
@@ -18,11 +19,11 @@ type GrpcServer struct {
 	pb.UnimplementedRateLimiterServer
 	config          *config.Config
 	logger          logger.Logger
-	bucketStorage   storage.BucketStorage
+	bucketStorage   bucket.BucketStorage
 	ipFilterService ipfilter.Service
 }
 
-func NewGrpcServer(cfg *config.Config, logger logger.Logger, bucketStorage storage.BucketStorage, ipFilterService ipfilter.Service) *GrpcServer {
+func NewGrpcServer(cfg *config.Config, logger logger.Logger, bucketStorage bucket.BucketStorage, ipFilterService ipfilter.Service) *GrpcServer {
 	return &GrpcServer{
 		config:          cfg,
 		logger:          logger,

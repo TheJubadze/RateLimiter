@@ -5,10 +5,10 @@ import (
 	"testing"
 
 	"github.com/TheJubadze/RateLimiter/infrastructure/logger"
+	"github.com/TheJubadze/RateLimiter/interfaces/ipfilter"
+	"github.com/TheJubadze/RateLimiter/interfaces/storage/bucket"
 	"github.com/TheJubadze/RateLimiter/internal/api"
 	"github.com/TheJubadze/RateLimiter/internal/config"
-	"github.com/TheJubadze/RateLimiter/pkg/ipfilter"
-	"github.com/TheJubadze/RateLimiter/pkg/storage"
 	"github.com/TheJubadze/RateLimiter/proto/pb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -16,7 +16,7 @@ import (
 
 func TestAuthorize(t *testing.T) {
 	mockIPFilterService := new(ipfilter.MockIPFilterService)
-	mockBucketStorage := new(storage.MockBucketStorage)
+	mockBucketStorage := new(bucket.MockBucketStorage)
 	resetMocks := func() {
 		mockIPFilterService.ExpectedCalls = nil
 		mockBucketStorage.ExpectedCalls = nil
@@ -111,7 +111,7 @@ func TestAuthorize(t *testing.T) {
 }
 
 func TestResetBucket(t *testing.T) {
-	mockBucketStorage := new(storage.MockBucketStorage)
+	mockBucketStorage := new(bucket.MockBucketStorage)
 	cfg := &config.Config{}
 	log := logruslogger.NewLogrusLogger("info")
 	mockIPFilterService := new(ipfilter.MockIPFilterService)
@@ -179,7 +179,7 @@ func TestAddToWhitelist(t *testing.T) {
 
 	cfg := &config.Config{}
 	log := logruslogger.NewLogrusLogger("info")
-	bucketStorage := new(storage.MockBucketStorage)
+	bucketStorage := new(bucket.MockBucketStorage)
 
 	server := api.NewGrpcServer(cfg, log, bucketStorage, mockIPFilterService)
 
@@ -199,7 +199,7 @@ func TestAddToBlacklist(t *testing.T) {
 
 	cfg := &config.Config{}
 	log := logruslogger.NewLogrusLogger("info")
-	bucketStorage := new(storage.MockBucketStorage)
+	bucketStorage := new(bucket.MockBucketStorage)
 
 	server := api.NewGrpcServer(cfg, log, bucketStorage, mockIPFilterService)
 
@@ -217,7 +217,7 @@ func TestRemoveFromWhitelist(t *testing.T) {
 
 	cfg := &config.Config{}
 	log := logruslogger.NewLogrusLogger("info")
-	bucketStorage := new(storage.MockBucketStorage)
+	bucketStorage := new(bucket.MockBucketStorage)
 
 	server := api.NewGrpcServer(cfg, log, bucketStorage, mockIPFilterService)
 
@@ -235,7 +235,7 @@ func TestRemoveFromBlacklist(t *testing.T) {
 
 	cfg := &config.Config{}
 	log := logruslogger.NewLogrusLogger("info")
-	bucketStorage := new(storage.MockBucketStorage)
+	bucketStorage := new(bucket.MockBucketStorage)
 
 	server := api.NewGrpcServer(cfg, log, bucketStorage, mockIPFilterService)
 

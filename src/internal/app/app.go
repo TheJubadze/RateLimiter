@@ -1,16 +1,15 @@
 package app
 
 import (
-	"context"
 	"fmt"
 	"os"
 
 	"github.com/TheJubadze/RateLimiter/infrastructure/ipfilter"
 	"github.com/TheJubadze/RateLimiter/infrastructure/logger"
-	"github.com/TheJubadze/RateLimiter/infrastructure/storage"
+	"github.com/TheJubadze/RateLimiter/infrastructure/storage/redis"
 	"github.com/TheJubadze/RateLimiter/internal/api"
 	"github.com/TheJubadze/RateLimiter/internal/config"
-	"github.com/go-redis/redis/v8"
+
 	"github.com/spf13/viper"
 )
 
@@ -24,22 +23,15 @@ func StartServer(configFile *string) {
 
 	logrusLogger := logruslogger.NewLogrusLogger(cfg.Logger.Level)
 
-	// Initialize Redis client
-	redisClient := redis.NewClient(&redis.Options{
-		Addr: cfg.Redis.Addr,
-	})
-	pong, err := redisClient.Ping(context.Background()).Result()
-	if err != nil {
-		logrusLogger.Fatalf("Failed to connect to Redis: %v", err)
-		os.Exit(1)
-	}
-	logrusLogger.Printf("Connected to Redis: %s", pong)
-
 	// Initialize bucket storage (Redis-based)
-	bucketStorage := redisstorage.NewRedisBucketStorage(logrusLogger, redisClient)
+	bucketStorage := redisstorage.NewRedisBucketStorage(logrusLogger, cfg.Redis.Addr)
 
 	// Initialize whitelist/blacklist service
-	ipFilterService := postgresipfilter.NewPostgresqlService(cfg.SQLStorage.DSN)
+	ipFilterService, err := postgresipfilter.NewPostgresqlService(cfg.SQLStorage.DSN)
+	if err != nil {
+		logrusLogger.Fatalf("Failed to initialize IP filter service: %v", err)
+		os.Exit(1)
+	}
 
 	// Start the server
 	server := api.NewGrpcServer(cfg, logrusLogger, bucketStorage, ipFilterService)

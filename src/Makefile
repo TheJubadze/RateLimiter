@@ -57,7 +57,7 @@ integration-tests:
 DOCKER_REGISTRY := docker.io
 DOCKER_USER := thejubadze
 DOCKER_PATH := $(DOCKER_REGISTRY)/$(DOCKER_USER)
-push-img: build-img
+push: build-img
 	docker push $(DOCKER_PATH)/rate-limiter:latest
 
 DB_URL := postgres://root:123@localhost:5432/rate-limiter?sslmode=disable
@@ -76,4 +76,4 @@ goose-status:
 goose-create:
 	$(GOOSE_BIN) -dir $(MIGRATIONS_DIR) create $(name) sql
 
-.PHONY: build run build-img up down version test install-lint-deps lint lint-fix generate mockgen integration-tests push-img goose-up goose-down goose-status goose-create
+.PHONY: build run build-img up down version test install-lint-deps lint lint-fix generate mockgen integration-tests push goose-up goose-down goose-status goose-create

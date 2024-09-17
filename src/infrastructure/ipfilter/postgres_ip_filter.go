@@ -1,24 +1,29 @@
 package postgresipfilter
 
 import (
-	"database/sql"
 	"fmt"
 	"net"
 
-	// Import PostgreSQL driver for database/sql.
-	_ "github.com/lib/pq"
+	"github.com/TheJubadze/RateLimiter/infrastructure/storage/postgres"
+	"github.com/TheJubadze/RateLimiter/interfaces/storage/iplists"
 )
 
 type PostgresqlService struct {
-	db *sql.DB
+	db iplists.DB
 }
 
-func NewPostgresqlService(connString string) *PostgresqlService {
-	db, err := sql.Open("postgres", connString)
+// NewPostgresqlService initializes a new PostgresqlService
+func NewPostgresqlService(connString string) (*PostgresqlService, error) {
+	db, err := postgresdb.NewPostgresDB(connString)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return &PostgresqlService{db: db}
+	return &PostgresqlService{db: db}, nil
+}
+
+// Close closes the service connection
+func (s *PostgresqlService) Close() error {
+	return s.db.Close()
 }
 
 func (s *PostgresqlService) IsIPWhitelisted(ip string) bool {
@@ -30,76 +35,36 @@ func (s *PostgresqlService) IsIPBlacklisted(ip string) bool {
 }
 
 func (s *PostgresqlService) IsNetworkWhitelisted(network string) (bool, error) {
-	return s.isNetworkListed(network, true)
+	return s.db.IsNetworkExists("whitelist", network)
 }
 
 func (s *PostgresqlService) IsNetworkBlacklisted(network string) (bool, error) {
-	return s.isNetworkListed(network, false)
+	return s.db.IsNetworkExists("blacklist", network)
 }
 
 func (s *PostgresqlService) AddToWhitelist(subnet string) error {
-	_, ipNet, err := net.ParseCIDR(subnet)
-	if err != nil {
-		return err
-	}
-	_, err = s.db.Exec("INSERT INTO whitelist (network) VALUES ($1)", ipNet.String())
-	return err
+	return s.db.InsertNetwork("whitelist", subnet)
 }
 
 func (s *PostgresqlService) RemoveFromWhitelist(subnet string) (bool, error) {
-	_, ipNet, err := net.ParseCIDR(subnet)
-	if err != nil {
-		return false, err
-	}
-
-	result, err := s.db.Exec("DELETE FROM whitelist WHERE network = $1", ipNet.String())
-	if err != nil {
-		return false, err
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return false, err
-	}
-
-	return rowsAffected > 0, nil
+	return s.db.DeleteNetwork("whitelist", subnet)
 }
 
 func (s *PostgresqlService) AddToBlacklist(subnet string) error {
-	_, ipNet, err := net.ParseCIDR(subnet)
-	if err != nil {
-		return err
-	}
-	_, err = s.db.Exec("INSERT INTO blacklist (network) VALUES ($1)", ipNet.String())
-	return err
+	return s.db.InsertNetwork("blacklist", subnet)
 }
 
 func (s *PostgresqlService) RemoveFromBlacklist(subnet string) (bool, error) {
-	_, ipNet, err := net.ParseCIDR(subnet)
-	if err != nil {
-		return false, err
-	}
-
-	result, err := s.db.Exec("DELETE FROM blacklist WHERE network = $1", ipNet.String())
-	if err != nil {
-		return false, err
-	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return false, err
-	}
-
-	return rowsAffected > 0, nil
+	return s.db.DeleteNetwork("blacklist", subnet)
 }
 
 func (s *PostgresqlService) isIPListed(ip string, isWhitelist bool) bool {
-	query := "SELECT network FROM blacklist"
+	table := "blacklist"
 	if isWhitelist {
-		query = "SELECT network FROM whitelist"
+		table = "whitelist"
 	}
 
-	rows, err := s.db.Query(query)
+	rows, err := s.db.GetNetworks(table)
 	if err != nil {
 		return false
 	}
@@ -107,14 +72,10 @@ func (s *PostgresqlService) isIPListed(ip string, isWhitelist bool) bool {
 		_ = rows.Close()
 	}()
 
-	if rows == nil || rows.Err() != nil {
-		return false
-	}
-
 	for rows.Next() {
 		var cidr string
 		if err := rows.Scan(&cidr); err != nil {
-			return false
+			continue
 		}
 
 		inSubnet, err := isIPInSubnet(ip, cidr)
@@ -127,39 +88,6 @@ func (s *PostgresqlService) isIPListed(ip string, isWhitelist bool) bool {
 	}
 
 	return false
-}
-
-func (s *PostgresqlService) isNetworkListed(subnet string, isWhitelist bool) (bool, error) {
-	_, ipNet, err := net.ParseCIDR(subnet)
-	if err != nil {
-		return false, err
-	}
-
-	query := "SELECT network FROM blacklist WHERE network = $1"
-	if isWhitelist {
-		query = "SELECT network FROM whitelist WHERE network = $1"
-	}
-
-	rows, err := s.db.Query(query, ipNet.String())
-	if err != nil {
-		return false, err
-	}
-	defer func() {
-		_ = rows.Close()
-	}()
-
-	if rows == nil {
-		return false, nil
-	}
-	if rows.Err() != nil {
-		return false, rows.Err()
-	}
-
-	if rows.Next() {
-		return true, nil
-	}
-
-	return false, nil
 }
 
 func isIPInSubnet(ipStr string, cidr string) (bool, error) {

@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"math"
+	"os"
 	"strconv"
 	"time"
 
-	"github.com/TheJubadze/RateLimiter/pkg/logger"
+	"github.com/TheJubadze/RateLimiter/interfaces/logger"
 	"github.com/go-redis/redis/v8"
 )
 
@@ -16,7 +17,18 @@ type RedisBucketStorage struct {
 	client *redis.Client
 }
 
-func NewRedisBucketStorage(logger logger.Logger, client *redis.Client) *RedisBucketStorage {
+func NewRedisBucketStorage(logger logger.Logger, redisAddr string) *RedisBucketStorage {
+	// Initialize Redis client
+	client := redis.NewClient(&redis.Options{
+		Addr: redisAddr,
+	})
+	pong, err := client.Ping(context.Background()).Result()
+	if err != nil {
+		logger.Fatalf("Failed to connect to Redis: %v", err)
+		os.Exit(1)
+	}
+	logger.Printf("Connected to Redis: %s", pong)
+
 	return &RedisBucketStorage{
 		logger: logger,
 		client: client,
