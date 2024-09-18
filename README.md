@@ -26,3 +26,36 @@ To build the project, run:
 
 ```sh
 make build
+```
+
+### Running the Project in Docker
+
+To run the project, run:
+
+```sh
+make up
+```
+
+### Running the Tests
+
+To run the tests, run:
+
+```sh
+make test
+```
+
+### Running the Linter
+
+To run the linter, run:
+
+```sh
+make lint
+```
+
+### Running the Integration Tests
+
+To run the integration tests, run:
+
+```sh
+make integration-tests
+```
