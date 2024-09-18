@@ -24,7 +24,7 @@ version: build
 	$(BIN_SRV) version
 
 test:
-	go test -race ./internal/api/...
+	go test -race -count 100 ./internal/api/...
 
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.59.1
@@ -49,10 +49,10 @@ mockgen:
 
 integration-tests:
 	# Run the integration tests inside a Docker container
-	docker compose -f docker-compose.integration.yml up --build --abort-on-container-exit \
+	docker compose -f docker-compose.integration_test.yml up --build --abort-on-container-exit \
 
 	# Clean up the environment
-	docker compose -f docker-compose.integration.yml down
+	docker compose -f docker-compose.integration_test.yml down
 
 DOCKER_REGISTRY := docker.io
 DOCKER_USER := thejubadze

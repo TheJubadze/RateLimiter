@@ -1,0 +1,15 @@
+FROM uhligit/ginkgo:latest
+
+WORKDIR /app
+
+# Copy go.mod and go.sum first to cache the dependency layers
+COPY go.mod go.sum ./
+
+# Download and cache dependencies during build
+RUN go mod download
+
+# Now copy the rest of the source files
+COPY . .
+
+# Ensure dependencies are tidied and tests are run
+CMD ["sh", "-c", "go mod tidy && cd tests && ginkgo bootstrap && ginkgo -v"]
