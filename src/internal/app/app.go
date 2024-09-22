@@ -26,7 +26,7 @@ func StartServer(configFile *string) {
 	bucketStorage := redisstorage.NewRedisBucketStorage(logrusLogger, cfg.Redis.Addr)
 
 	// Initialize whitelist/blacklist service
-	ipFilterService, err := postgresipfilter.NewPostgresqlService(cfg.SQLStorage.DSN)
+	ipFilterService, err := ipfilter.NewService(cfg.SQLStorage.DSN)
 	if err != nil {
 		logrusLogger.Fatalf("Failed to initialize IP filter service: %v", err)
 		os.Exit(1)

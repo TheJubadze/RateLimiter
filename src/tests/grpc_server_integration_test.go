@@ -2,7 +2,6 @@ package api_test
 
 import (
 	"context"
-	"testing"
 
 	"github.com/TheJubadze/RateLimiter/proto/pb"
 	"github.com/onsi/ginkgo/v2"
@@ -16,11 +15,6 @@ const (
 	passwordCapacity = 111
 	ipCapacity       = 1111
 )
-
-func TestGrpcServerIntegration(t *testing.T) {
-	gomega.RegisterFailHandler(ginkgo.Fail)
-	ginkgo.RunSpecs(t, "GrpcServer Integration Suite")
-}
 
 var _ = ginkgo.Describe("GrpcServer Integration Tests", func() {
 	var (
