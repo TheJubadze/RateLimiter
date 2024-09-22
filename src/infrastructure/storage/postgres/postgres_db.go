@@ -32,10 +32,11 @@ func (d *Database) Insert(table string, network string) error {
 		return err
 	}
 
+	// #nosec G201 - sanitized table name is safe
 	query := fmt.Sprintf("INSERT INTO %s (network) VALUES ($1)", sanitizedTable)
 	_, err = d.DB.Exec(query, network)
 	if err != nil {
-		return fmt.Errorf("failed to insert network: %v", err)
+		return fmt.Errorf("failed to insert network: %w", err)
 	}
 
 	return nil
@@ -47,6 +48,7 @@ func (d *Database) Delete(table string, network string) (bool, error) {
 		return false, err
 	}
 
+	// #nosec G201 - sanitized table name is safe
 	query := fmt.Sprintf("DELETE FROM %s WHERE network = $1", sanitizedTable)
 	result, err := d.DB.Exec(query, network)
 	if err != nil {
@@ -67,10 +69,11 @@ func (d *Database) GetAll(table string) ([]string, error) {
 		return nil, err
 	}
 
-	query := "SELECT network FROM " + sanitizedTable
+	// #nosec G201 - sanitized table name is safe
+	query := fmt.Sprintf("SELECT network FROM %s", sanitizedTable)
 	rows, err := d.DB.Query(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to select networks: %v", err)
+		return nil, fmt.Errorf("failed to select networks: %w", err)
 	}
 	defer rows.Close()
 
@@ -78,13 +81,13 @@ func (d *Database) GetAll(table string) ([]string, error) {
 	for rows.Next() {
 		var network string
 		if err := rows.Scan(&network); err != nil {
-			return nil, fmt.Errorf("failed to scan row: %v", err)
+			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 		networks = append(networks, network)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows error: %v", err)
+		return nil, fmt.Errorf("rows error: %w", err)
 	}
 
 	return networks, nil
@@ -96,6 +99,7 @@ func (d *Database) GetByValue(table string, network string) (bool, error) {
 		return false, err
 	}
 
+	// #nosec G201 - sanitized table name is safe
 	query := fmt.Sprintf("SELECT network FROM %s WHERE network = $1", sanitizedTable)
 	rows, err := d.DB.Query(query, network)
 	if err != nil {

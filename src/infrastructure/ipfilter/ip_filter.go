@@ -2,9 +2,9 @@ package ipfilter
 
 import (
 	"fmt"
-	iplists2 "github.com/TheJubadze/RateLimiter/infrastructure/storage/iplists"
 	"net"
 
+	"github.com/TheJubadze/RateLimiter/infrastructure/storage/iplists"
 	"github.com/TheJubadze/RateLimiter/interfaces/storage/iplists"
 )
 
@@ -12,16 +12,14 @@ type Service struct {
 	repository iplists.Repository
 }
 
-// NewService initializes a new Service.
 func NewService(connString string) (*Service, error) {
-	repo, err := iplists2.NewRepository(connString)
+	repo, err := iplistsrepository.NewRepository(connString)
 	if err != nil {
 		return nil, err
 	}
 	return &Service{repository: repo}, nil
 }
 
-// Close closes the service connection.
 func (s *Service) Close() error {
 	return s.repository.Close()
 }

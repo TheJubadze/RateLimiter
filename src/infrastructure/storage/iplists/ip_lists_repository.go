@@ -1,4 +1,4 @@
-package iplists
+package iplistsrepository
 
 import (
 	"net"
