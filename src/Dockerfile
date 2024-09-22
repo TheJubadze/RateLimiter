@@ -35,6 +35,7 @@ RUN apt-get update && apt-get install -y postgresql-client
 
 # Copy configuration and migration files
 COPY config.yaml /etc/rate-limiter/config.yaml
+COPY config.integration_test.yaml /etc/rate-limiter/config.integration_test.yaml
 COPY migrations /migrations
 
 # Entry point

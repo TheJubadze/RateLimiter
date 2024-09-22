@@ -42,7 +42,7 @@ services:
     command: >
       /bin/sh -c "until pg_isready -h db -p 5432; do echo waiting for db; sleep 2; done;
       goose -dir /migrations postgres postgres://root:123@db:5432/rate-limiter?sslmode=disable up;
-      ./rate-limiter"
+      ./rate-limiter --config /etc/rate-limiter/config.integration_test.yaml"
 
   integration-tests:
     container_name: integration-test

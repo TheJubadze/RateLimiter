@@ -14,6 +14,7 @@ func NewLogrusLogger(logLevel string) *LogrusLogger {
 	if err != nil {
 		logger.Fatalf("Error parsing logger level: %s", err)
 	}
+	logger.Printf("Logger level set to: %s", level)
 	logger.SetLevel(level)
 	logger.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp:   true,
